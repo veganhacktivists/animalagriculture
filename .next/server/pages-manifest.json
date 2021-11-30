@@ -1,0 +1,9 @@
+{
+  "/_app": "pages/_app.js",
+  "/_document": "pages/_document.js",
+  "/_error": "pages/_error.js",
+  "/watch/[videoId]/[instanceId]": "pages/watch/[videoId]/[instanceId].js",
+  "/api/videos/[videoId]/instances/[instanceId]": "pages/api/videos/[videoId]/instances/[instanceId].js",
+  "/api/videos/[videoId]/instances/[instanceId]/questions": "pages/api/videos/[videoId]/instances/[instanceId]/questions.js",
+  "/api/videos/[videoId]/instances/[instanceId]/questions/[questionId]": "pages/api/videos/[videoId]/instances/[instanceId]/questions/[questionId].js"
+}
