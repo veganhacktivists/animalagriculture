@@ -38,6 +38,7 @@ const Home: NextPage = () => {
     const [progress, setProgress] = useState(0);
     const [volume, setVolume] = useState(1);
     const [captchas, setCaptchas] = useState([]);
+    const [submittingCaptcha, setSubmittingCaptcha] = useState<string | null>(null);
 
     // @TODO - Figure out how to ensure the LS key is correct upon first load,
     // because at the moment, the router query params are undefined when this hook runs.
@@ -127,8 +128,12 @@ const Home: NextPage = () => {
     }
 
     const handleSubmitCaptchaAnswer = (id: string, answer: string) => {
-        submitQuestionAnswer(videoId as string, instanceId as string, id, answer)
-            .then(res => console.log(res));
+        setSubmittingCaptcha(id);
+        return submitQuestionAnswer(videoId as string, instanceId as string, id, answer)
+    }
+
+    const removeCaptcha = (id: string) => {
+        setCaptchas(captchas => captchas.filter(captcha => captcha.id !== id));
     }
 
     return (
@@ -150,11 +155,12 @@ const Home: NextPage = () => {
                         <div>
                             <h4>Some things to keep in mind:</h4>
                             <ul>
-                                <li>Take breaks if you need; it's difficult to watch at some points, and we save your progress</li>
-                                <li>Save this URL, as you can only resume watching if you use the same link</li>
+                                <li>We save your progress as you watch, so watch longer videos in chunks</li>
+                                <li>The questions will appear next to the video as it plays</li>
+                                <li>You need to answer each question within a couple minutes of it appearing</li>
                             </ul>
                             <Button onClick={() => setPlayerOpen(true)}>
-                                {progress ? 'resume the film' : 'start the film'}
+                                {progress ? 'resume watching' : 'start watching'}
                             </Button>
                         </div>
                     )}
@@ -162,10 +168,10 @@ const Home: NextPage = () => {
                     {videoURL && playerOpen && (
                         <PlayerWrapper>
                             <div style={{display: 'flex'}}>
-                                <div>
+                                <div style={{minWidth: 700}}>
                                     <ReactPlayer
                                         ref={videoRef}
-                                        url='https://www.farmtransparency.org/uploads/videos/Dominion_720.mp4'
+                                        url={videoURL}
                                         muted={!playing}
                                         playing={playing}
                                         volume={volume}
@@ -200,10 +206,11 @@ const Home: NextPage = () => {
                                         </Timer>
                                     </PlayerControls>
                                 </div>
-                                <div>
+                                <div style={{minWidth: 230}}>
                                     <CaptchaQueue
                                         captchas={captchas}
                                         submitCaptchaAnswer={handleSubmitCaptchaAnswer}
+                                        removeCaptcha={removeCaptcha}
                                     />
                                 </div>
                             </div>

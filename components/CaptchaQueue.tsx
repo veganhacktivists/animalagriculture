@@ -6,8 +6,9 @@ type CaptchaAnswers = {
     [captchaId: string]: string
 }
 
-const CaptchaQueue = ({captchas, submitCaptchaAnswer}) => {
+const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
     const [answers, setAnswers] = useState<CaptchaAnswers>({});
+    const [erroredCaptchas, setErroredCaptchas] = useState<string[]>([]);
 
     const setCaptchaAnswer = (id: string, value: string) => {
         setAnswers(answers => {
@@ -19,16 +20,30 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer}) => {
     }
 
     const handleSubmitCaptchaAnswer = (id: string) => {
-        submitCaptchaAnswer(id, answers[id]);
+        submitCaptchaAnswer(id, answers[id])
+            .then(res => {
+                if (res.correct) {
+                    removeCaptcha(id);
+                } else {
+                    setErroredCaptchas(currentErroredCaptchas =>
+                        [...currentErroredCaptchas, id]
+                    );
+                    setCaptchaAnswer(id, '');
+                }
+            })
+            .catch(() => setErroredCaptchas(currentErroredCaptchas =>
+                [...currentErroredCaptchas, id]
+            ));
     }
 
     return (
         <>
-        {captchas.length && (
             <Queue>
                 {captchas.map((captcha) => {
+                    const isErrored = erroredCaptchas.includes(captcha.id);
+
                     return (
-                        <CaptchaWrapper key={captcha.id}>
+                        <CaptchaWrapper key={captcha.id} errored={isErrored}>
                             <CaptchaImage dangerouslySetInnerHTML={{__html: captcha.image}}></CaptchaImage>
                             <AnswerWrapper>
                                 <CaptchaAnswer
@@ -44,7 +59,6 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer}) => {
                     )
                 })}
             </Queue>
-        )}
         </>
     )
 }
@@ -59,6 +73,11 @@ const Queue = styled.div`
 const CaptchaWrapper = styled.div`
     margin-bottom: 30px; 
     background-color: #fff;
+    border: 2px solid #fff;
+
+    ${({errored}) => errored ? `
+        border-color: ${Colors.Vermillion};
+    `: ``}
 `;
 const CaptchaImage = styled.div`
 `;

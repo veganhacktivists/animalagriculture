@@ -22,23 +22,23 @@ const Home: NextPage = () => {
 
           <Explanation>
             <Step>
-              <StepTitle><Red>1.</Red> Start watching Dominion.</StepTitle>
-              <StepBody>Stream Dominion here, for free.</StepBody>
+              <StepTitle><Red>1.</Red> Start watching a video</StepTitle>
+              <StepBody>Activists can upload videos they want you to watch, and set a monetary reward for completing it.</StepBody>
             </Step>
 
             <Step>
-              <StepTitle><Red>2.</Red> Answer simple questions along the way.</StepTitle>
-              <StepBody>We will periodically pause the film and prompt you with a simple question.</StepBody>
+              <StepTitle><Red>2.</Red> Answer simple questions as you watch.</StepTitle>
+              <StepBody>We will show you captchas as you watch, which you need to correctly answer.</StepBody>
             </Step>
 
             <Step>
               <StepTitle><Red>3.</Red> Get paid.</StepTitle>
-              <StepBody>After finishing the film, provide your CashApp or Venmo username, and <Underline>you'll get $30.</Underline></StepBody>
+              <StepBody>After completing a video, we will notify the activist who uploaded it so they can pay you.</StepBody>
             </Step>
           </Explanation>
 
           <ButtonRow>
-            <Link href="/watch/1/new"><Button>start watching</Button></Link>
+            <Link href="/watch/2/new"><Button>start watching</Button></Link>
           </ButtonRow>
         </Container>
       </main>

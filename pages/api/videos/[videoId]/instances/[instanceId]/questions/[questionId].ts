@@ -8,7 +8,6 @@ export default async function handler(
 ) {
     if (req.method === 'POST') {
         try {
-            const videoId = Array.isArray(req.query.videoId) ? req.query.videoId[0] : req.query.videoId;
             const instanceId = Array.isArray(req.query.instanceId) ? req.query.instanceId[0] : req.query.instanceId;
             const questionId = Array.isArray(req.query.questionId) ? req.query.questionId[0] : req.query.questionId;
 
@@ -53,7 +52,6 @@ export default async function handler(
             }
 
             const answeredCorrectly = question.code === answer;
-            console.log(question.code, answer)
 
             if (answeredCorrectly) {
                 await supabaseServer

@@ -11,7 +11,7 @@ const Header = () => {
             </div>
             <HeaderInfo>
                 <Title>animal<Red>agriculture</Red>.watch</Title>
-                <Subtext>Get paid by activists to watch Dominion.</Subtext>
+                <Subtext>Get paid by activists to watch important videos.</Subtext>
                 <Link href="/about">Learn why this is important →</Link>
             </HeaderInfo>
         </HeaderWrapper>

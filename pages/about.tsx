@@ -19,8 +19,8 @@ const Home: NextPage = () => {
                         <Image src="/images/logo.png" alt="The logo of animalagriculture.watch" width={100} height={100} />
                         <HeaderInfo>
                             <Title>animal<Red>agriculture</Red>.watch</Title>
-                            <Subtext>Get paid by activists to watch Dominion.</Subtext>
-                            <Link href="/">Watch the film now →</Link>
+                            <Subtext>Get paid by activists to watch important videos.</Subtext>
+                            <Link href="/">See how it works →</Link>
                         </HeaderInfo>
                     </Header>
 
@@ -32,8 +32,20 @@ const Home: NextPage = () => {
                         <br />
                         <br />
                         Fortunately, many animal rights activists have either broken these laws or worked around them to bring footage of animal agriculture
-                        to the public. Now, the most important thing for us to do is witness the footage. As an incentive for viewing what is admittedly
-                        difficult and uncomfortable footage, I created this website to pay folks in return for lending their attention to...
+                        to the public. Additionally, there is a growing catalogue of information on the scientific basis of plant-based diets, from environmental and 
+                        nutritional viewpoints, which are also important for explaining why veganism is not only an option, but imperative.
+                        <br />
+                        <br />
+                        Activists want this footage and information to be public knowledge, but often times there are few incentives for watching
+                        what can be admittedly grizzly or uncomfortable content. This website provides that incentive by offering cold, hard cash in exchange for your attention.
+                        <br />
+                        <br />
+                        Activists can sponsor videos to be watched, and select an amount of monetary compensation for each video. When someone completes a video, the activist
+                        will be informed, so they can render payment via the information provided by the viewer before watching the video.
+                        <br />
+                        <br />
+                        - james quinlan
+
                     </p>
                 </Container>
             </main>
