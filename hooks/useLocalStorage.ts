@@ -1,5 +1,3 @@
-import {useState} from 'react';
-
 export function useLocalStorage<T>(key: string, initialValue: T) {
     const getValue = () => {
         try {
@@ -24,5 +22,5 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         }
     };
 
-    return [getValue, setValue] as const;
+    return [getValue, setValue];
 }
