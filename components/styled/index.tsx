@@ -1,13 +1,6 @@
 import styled from 'styled-components';
 import {default as NextLink} from 'next/link';
-
-export const Colors = {
-    Vermillion: '#C64444',
-    Rosewood: '#561414',
-    Papaya: '#FDF0D5',
-    Indigo: '#083D77',
-    BabyBlue: '#A5D8FF',
-}
+import { Colors } from './consts';
 
 export const PageContainer = styled.div`
     margin-top: 60px;
@@ -27,6 +20,8 @@ export const Center = styled.div`
 `;
 
 export const Button = styled.button`
+    display: inline-flex;
+    align-items: center;
     padding: 8px 15px;
     background-color: ${Colors.Indigo};
     font-size: 18px;
@@ -45,7 +40,14 @@ export const Button = styled.button`
 export const ButtonRow = styled.div`
     display: flex;
     align-items: space-between;
-    margin-top: 30px;
+`;
+
+export const Margin = styled.div`
+    margin: ${props => props.margin || '0px'};
+    margin-left: ${props => props.marginLeft || '0px'};
+    margin-right: ${props => props.marginRight || '0px'};
+    margin-top: ${props => props.marginTop || '0px'};
+    margin-bottom: ${props => props.marginBotton || '0px'};
 `;
 
 export const StyledLink = styled.a`
@@ -64,3 +66,16 @@ export const Link = ({children, href, ...rest}) => {
 export const Red = styled.span`
   color: ${Colors.Vermillion};
 `;
+
+interface IconProps {
+    name: string;
+    color?: string;
+    margin?: string;
+}
+export const Icon = ({name, color, margin}: IconProps) => {
+    return <span
+        style={{color: color || '#000', margin}}
+        className="material-icons">
+            {name}
+    </span>;
+}

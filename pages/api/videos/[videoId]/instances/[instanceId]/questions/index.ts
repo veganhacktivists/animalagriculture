@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { NextApiRequest, NextApiResponse } from 'next';
 import svgCaptcha from 'svg-captcha';
-import { Colors } from '../../../../../../../components/styled';
+import { Colors } from '../../../../../../../components/styled/consts';
 import { supabaseServer } from '../../../../../../../services';
 
 export default async function handler(
@@ -40,8 +40,9 @@ export default async function handler(
                 return question.timestamp >= after &&
                     question.timestamp < before;
             }).map(question => {
+                // @ts-ignore
                 const captcha = svgCaptcha(question.code, {
-                    width: 300,
+                    width: 250,
                     color: true,
                     noise: 3,
                     background: Colors.Papaya

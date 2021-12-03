@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import Header from '../components/Header';
-import { Button, ButtonRow, Red, Container, PageContainer } from '../components/styled';
+import { MainHeader } from '../components/Header';
+import { Button, ButtonRow, Red, Container, PageContainer, Margin } from '../components/styled';
 
 
 const Home: NextPage = () => {
@@ -18,7 +18,7 @@ const Home: NextPage = () => {
       <main>
         <Container>
 
-          <Header />
+          <MainHeader />
 
           <Explanation>
             <Step>
@@ -38,8 +38,11 @@ const Home: NextPage = () => {
           </Explanation>
 
           <ButtonRow>
-            <Link href="/watch/2/new"><Button>start watching</Button></Link>
+            <Link href="/watch/3/new"><Button>start watching</Button></Link>
           </ButtonRow>
+          <Margin marginTop='10px'>
+            <small>This is in alpha, so there is only one video for test purposes.</small>
+          </Margin>
         </Container>
       </main>
     </PageContainer>

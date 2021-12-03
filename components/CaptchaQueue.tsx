@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import styled from 'styled-components';
-import { Colors } from './styled';
+import { breakPoints, Colors } from './styled/consts';
 
 type CaptchaAnswers = {
     [captchaId: string]: string
@@ -9,6 +9,7 @@ type CaptchaAnswers = {
 const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
     const [answers, setAnswers] = useState<CaptchaAnswers>({});
     const [erroredCaptchas, setErroredCaptchas] = useState<string[]>([]);
+    const [submittingCaptcha, setSubmittingCaptcha] = useState<boolean>(false);
 
     const setCaptchaAnswer = (id: string, value: string) => {
         setAnswers(answers => {
@@ -20,6 +21,7 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
     }
 
     const handleSubmitCaptchaAnswer = (id: string) => {
+        setSubmittingCaptcha(true);
         submitCaptchaAnswer(id, answers[id])
             .then(res => {
                 if (res.correct) {
@@ -33,7 +35,10 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
             })
             .catch(() => setErroredCaptchas(currentErroredCaptchas =>
                 [...currentErroredCaptchas, id]
-            ));
+            ))
+            .finally(() => {
+                setSubmittingCaptcha(false);
+            })
     }
 
     return (
@@ -48,10 +53,10 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
                             <AnswerWrapper>
                                 <CaptchaAnswer
                                     type="text"
-                                    placeholder="What does the above captcha say?"
+                                    placeholder="Type the above code"
                                     onChange={(e) => setCaptchaAnswer(captcha.id, e.target.value)}
                                 />
-                                <SubmitButton onClick={() => handleSubmitCaptchaAnswer(captcha.id)}>
+                                <SubmitButton disabled={submittingCaptcha} onClick={() => handleSubmitCaptchaAnswer(captcha.id)}>
                                     submit
                                 </SubmitButton>
                             </AnswerWrapper>
@@ -65,25 +70,34 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
 
 export default CaptchaQueue;
 
-
 const Queue = styled.div`
-    padding-left: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+
+    @media (${breakPoints.desktop}) {
+        padding-left: 30px;
+        margin-top: 0;
+        width: 300px;
+    }
 `;
 
 const CaptchaWrapper = styled.div`
     margin-bottom: 30px; 
     background-color: #fff;
     border: 2px solid #fff;
+    max-width: 252px;
 
     ${({errored}) => errored ? `
         border-color: ${Colors.Vermillion};
     `: ``}
 `;
-const CaptchaImage = styled.div`
-`;
+const CaptchaImage = styled.div``;
 const AnswerWrapper = styled.div`
     display: flex;
     justify-content: space-between;
+    margin-top: -6px;
 `;
 const CaptchaAnswer = styled.input`
     width: 100%;
@@ -98,4 +112,10 @@ const SubmitButton = styled.button`
     color: #fff;
     padding: 10px 15px;
     cursor: pointer;
+    font-size: 16px;
+
+    &:disabled {
+        background-color: #eee;
+        color: #333;
+    }
 `;

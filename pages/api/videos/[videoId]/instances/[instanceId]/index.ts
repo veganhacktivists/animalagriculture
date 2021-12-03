@@ -7,13 +7,14 @@ export default async function handler(
     res: NextApiResponse
 ) {
     if (req.method === 'GET') {
-        const videoId = req.query.videoId;
         const instanceId = req.query.instanceId;
 
         const {data, error} = await supabaseServer
             .from('video_instances')
             .select(`
-                video_id (url, length)
+                video_id (url, length),
+                questions,
+                answers
             `)
             .eq('code', instanceId);
 
@@ -21,9 +22,28 @@ export default async function handler(
             console.error(error)
             res.status(400);
             res.json({error});
+            return;
         }
 
+        if (!data.length) {
+            res.status(404);
+            res.json({});
+            return;
+        }
+
+        const instance = data[0];
+        const hasAnsweredQuestions = instance.answers && Object.keys(instance.answers).length;
+        const hasCompletedQuestions = instance.answers && Object.keys(instance.answers).length === instance.questions.length;
+        const status = hasCompletedQuestions ? 'completed' :
+            hasAnsweredQuestions ? 'in_progress' :
+            'unstarted';
+        
+        const payload = {
+            instance,
+            status
+        };
+
         res.status(200);
-        res.json({data: data[0]});
+        res.json({data: payload});
     }
 }

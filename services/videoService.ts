@@ -1,5 +1,3 @@
-import { supabase } from ".";
-
 /**
  * 
  * @param seconds The duration of the video
@@ -68,6 +66,11 @@ export const createVideoInstance = async (videoId: number, paymentUsername: stri
                 'Content-Type': 'application/json'
             }
         })
+        .then((res) => res.json())
+}
+
+export const getVideo = async (videoId: number) => {
+    return await fetch(`/api/videos/${videoId}`)
         .then((res) => res.json())
 }
 

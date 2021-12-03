@@ -28,7 +28,7 @@ export default async function handler(
         }
 
         const video = data[0];
-        const videoLength = video.length;
+        const videoLength = video.end_time || video.length;
         const questionTimestamps = calculateQuestionTimestamps(videoLength);
         const questions = questionTimestamps.map(timestamp => {
             return {
@@ -42,7 +42,7 @@ export default async function handler(
             video_id: videoId,
             payment_username: paymentUsername,
             questions,
-        }
+        };
 
         const {data: newInstanceData, error: newErrorData} = await supabaseServer
             .from('video_instances')

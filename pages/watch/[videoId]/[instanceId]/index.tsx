@@ -4,9 +4,10 @@ import Head from 'next/head';
 import styled from 'styled-components';
 import ReactPlayer from 'react-player';
 import { useRouter } from 'next/router';
-import Header from '../../../../components/Header';
+import { MainHeader } from '../../../../components/Header';
 import CaptchaQueue from '../../../../components/CaptchaQueue';
-import { Button, Container, PageContainer } from '../../../../components/styled';
+import { Button, Container, Icon, PageContainer, ButtonRow, Margin } from '../../../../components/styled';
+import { breakPoints, Colors } from '../../../../components/styled/consts';
 import { getVideoInstance, getVideoInstanceQuestions, submitQuestionAnswer } from '../../../../services/videoService';
 import { useLocalStorage } from '../../../../hooks/useLocalStorage';
 
@@ -26,23 +27,24 @@ const secondsToReadableTime = (seconds: number) => {
     return `${hours}:${minutesReadable}:${secondsReadable}`;
 }
 
-const Home: NextPage = () => {
+const WatchVideoPage: NextPage = () => {
     const [videoURL, setVideoURL] = useState(null);
     const videoRef = useRef(null);
     const router = useRouter();
     const videoId = router.query.videoId;
     const instanceId = router.query.instanceId;
+    const [loading, setLoading] = useState(true);
     const [playerOpen, setPlayerOpen] = useState(false);
     const [playing, setPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(1);
+    const [volume, setVolume] = useState(.3);
     const [captchas, setCaptchas] = useState([]);
-    const [submittingCaptcha, setSubmittingCaptcha] = useState<string | null>(null);
+    const [status, setStatus] = useState('unstarted');
 
     // @TODO - Figure out how to ensure the LS key is correct upon first load,
     // because at the moment, the router query params are undefined when this hook runs.
-    const [savedProgress, setSavedProgress] = useLocalStorage(
+    const [getSavedProgress, setSavedProgress] = useLocalStorage(
         getVideoProgressLSKey(router.query.instanceId as string),
         null
     );
@@ -56,8 +58,16 @@ const Home: NextPage = () => {
         if (videoId && instanceId) {
             getVideoInstance(parseInt(videoId), instanceId)
                 .then(res => {
-                    setVideoURL(res.data.video_id.url);
-                });
+                    setVideoURL(res.data.instance.video_id.url);
+                    setStatus(res.data.status);
+                })
+                .finally(() => setLoading(false))
+        }
+
+        if (router.query.instanceId) {
+            const savedProgress = getSavedProgress();
+            setLastQueriedTime(savedProgress);
+            setProgress(savedProgress);
         }
     }, [router]);
 
@@ -91,7 +101,6 @@ const Home: NextPage = () => {
                 });
 
                 // After 2 minutes, remove any captchas that remain in the queue
-                // @TODO - Figure out how to set this based on the length of the video
                 setTimeout(() => {
                     setCaptchas(currentCaptchas =>
                         currentCaptchas.filter(currentCaptcha => !incomingCaptchaIds.includes(currentCaptcha.id))
@@ -110,16 +119,19 @@ const Home: NextPage = () => {
     const handleReady = () => {
         const duration = videoRef.current?.getDuration();
         setDuration(Math.floor(duration));
+        const savedProgress = getSavedProgress();
 
         if (!hasLoadedSavedProgress && savedProgress) {
             videoRef.current?.seekTo(savedProgress, 'seconds');
-            setHasLoadedSavedProgress(true);
+
         }
     }
 
     const handleProgress = ({ playedSeconds }) => {
-        setProgress(Math.round(playedSeconds));
-        setSavedProgress(playedSeconds);
+        if (playedSeconds) {
+            setProgress(Math.round(playedSeconds));
+            setSavedProgress(playedSeconds);
+        }
 
         // Query for questions every 5 seconds
         if (playedSeconds - lastQueriedTime > 5) {
@@ -128,12 +140,22 @@ const Home: NextPage = () => {
     }
 
     const handleSubmitCaptchaAnswer = (id: string, answer: string) => {
-        setSubmittingCaptcha(id);
         return submitQuestionAnswer(videoId as string, instanceId as string, id, answer)
     }
 
     const removeCaptcha = (id: string) => {
         setCaptchas(captchas => captchas.filter(captcha => captcha.id !== id));
+    }
+
+    const handlePlay = () => {
+        if (!playing) {
+            setPlaying(true);
+        }
+    }
+
+    const handleSeek = (seconds) => {
+        console.log(seconds);
+        setLastQueriedTime(seconds);
     }
 
     return (
@@ -145,14 +167,22 @@ const Home: NextPage = () => {
 
             <main>
                 <Container>
-                    <Header />
+                    <MainHeader />
 
-                    {!videoURL && (
+                    {loading && (
                         <h5>Loading...</h5>
                     )}
 
-                    {videoURL && !playerOpen && (
+                    {!loading && !playerOpen && (
                         <div>
+                            
+                            {status === 'completed' && (
+                                <Completed>
+                                    <h3>You've finished the video!</h3>
+                                    <p>Nothing more for you to do, except wait to get paid. Thanks for watching.</p>
+                                </Completed>
+                            )}
+
                             <h4>Some things to keep in mind:</h4>
                             <ul>
                                 <li>We save your progress as you watch, so watch longer videos in chunks</li>
@@ -166,9 +196,9 @@ const Home: NextPage = () => {
                     )}
 
                     {videoURL && playerOpen && (
-                        <PlayerWrapper>
-                            <div style={{display: 'flex'}}>
-                                <div style={{minWidth: 700}}>
+                        <Modal>
+                            <SectionWrapper>
+                                <div style={{flexGrow: 1}}>
                                     <ReactPlayer
                                         ref={videoRef}
                                         url={videoURL}
@@ -179,16 +209,26 @@ const Home: NextPage = () => {
                                         height={400}
                                         onReady={handleReady}
                                         onProgress={handleProgress}
+                                        onPlay={handlePlay}
+                                        onSeek={handleSeek}
                                         controls={false}
                                     />
 
                                     <PlayerControls>
-                                        <div>
-                                            <Button onClick={togglePlaying}>{playing ? 'pause' : 'play'}</Button>
-                                            <Button onClick={handleClose}>close</Button>
-                                        </div>
+                                        <ButtonRow>
+                                            <Button onClick={togglePlaying}>
+                                                {playing ? 'pause' : 'play'}
+                                                <Icon margin={'0 0 0 5px'} name={playing ? 'pause' : 'play_circle_filled'} color="#fff" />
+                                            </Button>
+                                            <Button onClick={handleClose}>
+                                                close
+                                                <Icon margin={'0 0 0 5px'} name='close' color="#fff" />
+                                            </Button>
+                                        </ButtonRow>
 
                                         <VolumeWrapper>
+                                            <Icon name={"volume_up"} color="#fff" />
+
                                             <VolumeInput
                                                 type="range"
                                                 min={0}
@@ -206,15 +246,15 @@ const Home: NextPage = () => {
                                         </Timer>
                                     </PlayerControls>
                                 </div>
-                                <div style={{minWidth: 230}}>
+                                <div>
                                     <CaptchaQueue
                                         captchas={captchas}
                                         submitCaptchaAnswer={handleSubmitCaptchaAnswer}
                                         removeCaptcha={removeCaptcha}
                                     />
                                 </div>
-                            </div>
-                        </PlayerWrapper>
+                            </SectionWrapper>
+                        </Modal>
                     )}
 
                 </Container>
@@ -223,19 +263,18 @@ const Home: NextPage = () => {
     )
 }
 
-export default Home;
+export default WatchVideoPage;
 
-const PlayerWrapper = styled.div`
+const Modal = styled.div`
     position: absolute;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
     top: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-top: 60px;
 
     ${Button} {
         margin-right: 10px;
@@ -243,9 +282,16 @@ const PlayerWrapper = styled.div`
 `;
 
 const PlayerControls = styled.div`
-    margin-top: 30px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    margin-top: 30px;
+    padding: 0 30px;
+
+    @media (${breakPoints.desktop}) {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0;
+    }
 `;
 
 const Timer = styled.div`
@@ -255,7 +301,37 @@ const Timer = styled.div`
 const VolumeWrapper = styled.div`
     display: flex;
     align-items: center;
+    margin: 20px 0;
+
+    @media (${breakPoints.desktop}) {
+        margin: 0;
+        justify-content: space-between;
+    }
 `;
 const VolumeInput = styled.input`
-    width: 300px;
+    width: 200px;
+`;
+const SectionWrapper = styled.div`
+    display: flex;    
+    flex-direction: column;
+    width: 100%;
+
+    @media (${breakPoints.desktop}) {
+        flex-direction: row;
+        width: 1000px;
+    }
+`;
+
+const Completed = styled.div`
+    background-color: ${Colors.Papaya};
+    padding: 30px;
+
+    h3 {
+        font-size: 32px;
+        margin: 0;
+    }
+
+    p {
+        margin: 0;
+    }
 `;
