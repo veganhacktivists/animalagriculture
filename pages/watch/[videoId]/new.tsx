@@ -16,8 +16,6 @@ const New: NextPage = () => {
     const [paymentUsername, setPaymentUsername] = useState('');
     const {video, loading} = useGetVideo(router.query.videoId);
 
-    console.log(video)
-
     const createInstance = () => {
         const videoId = router.query.videoId;
 
