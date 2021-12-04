@@ -50,7 +50,7 @@ const New: NextPage = () => {
                         <div>
                             <VideoInfo>
                                 <h4>{video.title}</h4>
-                                <h5>You'll receive <Reward>${video.reward}</Reward> for completing this video.</h5>
+                                <h5>You&apos;ll receive <Reward>${video.reward}</Reward> for completing this video.</h5>
                             </VideoInfo>
 
                             <label style={{display: 'block'}} htmlFor="username">Venmo username:</label>

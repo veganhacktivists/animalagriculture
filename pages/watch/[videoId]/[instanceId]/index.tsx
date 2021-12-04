@@ -44,7 +44,7 @@ const WatchVideoPage: NextPage = () => {
 
     // @TODO - Figure out how to ensure the LS key is correct upon first load,
     // because at the moment, the router query params are undefined when this hook runs.
-    const [getSavedProgress, setSavedProgress] = useLocalStorage(
+const [getSavedProgress, setSavedProgress] = useLocalStorage(
         getVideoProgressLSKey(router.query.instanceId as string),
         null
     );
@@ -57,7 +57,7 @@ const WatchVideoPage: NextPage = () => {
 
         if (videoId && instanceId) {
             getVideoInstance(parseInt(videoId), instanceId)
-                .then(res => {
+            .then(res => {
                     setVideoURL(res.data.instance.video_id.url);
                     setStatus(res.data.status);
                 })
@@ -178,7 +178,7 @@ const WatchVideoPage: NextPage = () => {
                             
                             {status === 'completed' && (
                                 <Completed>
-                                    <h3>You've finished the video!</h3>
+                                    <h3>You&apos;ve finished the video!</h3>
                                     <p>Nothing more for you to do, except wait to get paid. Thanks for watching.</p>
                                 </Completed>
                             )}

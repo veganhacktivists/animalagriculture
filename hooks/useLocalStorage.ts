@@ -1,5 +1,5 @@
-export function useLocalStorage<T>(key: string, initialValue: T) {
-    const getValue = () => {
+export function useLocalStorage<T>(key: string, initialValue: T): any[] {
+    const getValue = (): any => {
         try {
             const item = window.localStorage.getItem(key);
             return item ? JSON.parse(item) : initialValue;
