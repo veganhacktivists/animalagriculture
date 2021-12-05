@@ -56,6 +56,31 @@ export const generateQuestionCode = (length: number) => {
     return result;
 }
 
+export const secondsToReadableTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const leftoverSecondsFromHours = seconds - (hours * 3600);
+    const minutes = Math.floor(leftoverSecondsFromHours / 60);
+    const leftOverSeconds = leftoverSecondsFromHours - (minutes * 60);
+
+    const minutesReadable = minutes < 10 ? `0${minutes}` : minutes;
+    const secondsReadable = leftOverSeconds < 10 ? `0${leftOverSeconds}` : leftOverSeconds;
+
+    return `${hours}:${minutesReadable}:${secondsReadable}`;
+}
+
+export const secondsToTimeString = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const leftoverSecondsFromHours = seconds - (hours * 3600);
+    const minutes = Math.floor(leftoverSecondsFromHours / 60);
+    const leftOverSeconds = leftoverSecondsFromHours - (minutes * 60);
+
+    let timeString = `${leftOverSeconds} seconds`;
+    timeString = minutes ? `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}, ${timeString}` : timeString;
+    timeString = hours ? `${hours} ${hours === 1 ? 'hour' : 'hours'}, ${timeString}` : timeString;
+
+    return timeString;
+}
+
 export const createVideoInstance = async (videoId: number, paymentUsername: string) => {
     return await fetch(`/api/videos/${videoId}/instances`, {
             method: 'POST',

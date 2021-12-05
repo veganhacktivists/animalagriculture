@@ -4,7 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { Button, ButtonRow, Container, PageContainer, Margin } from '../../../components/styled';
-import { createVideoInstance } from '../../../services/videoService';
+import { createVideoInstance, secondsToTimeString } from '../../../services/videoService';
 import { isArray } from 'util';
 import { MainHeader } from '../../../components/Header';
 import useGetVideo from '../../../hooks/useGetVideo';
@@ -48,6 +48,7 @@ const New: NextPage = () => {
                         <div>
                             <VideoInfo>
                                 <h4>&ldquo;{video.title}&ldquo;</h4>
+                                <h5>Duration: {secondsToTimeString(video.length)}</h5>
                                 <h5>You&apos;ll receive <Reward>${video.reward}</Reward> for completing this video.</h5>
                             </VideoInfo>
 

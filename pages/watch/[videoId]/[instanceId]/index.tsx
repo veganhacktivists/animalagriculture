@@ -6,25 +6,13 @@ import ReactPlayer from 'react-player';
 import { useRouter } from 'next/router';
 import { MainHeader } from '../../../../components/Header';
 import CaptchaQueue from '../../../../components/CaptchaQueue';
-import { Button, Container, Icon, PageContainer, ButtonRow, Margin, StyledLink } from '../../../../components/styled';
+import { Button, Container, Icon, PageContainer, ButtonRow, StyledLink } from '../../../../components/styled';
 import { breakPoints, Colors } from '../../../../components/styled/consts';
-import { getVideoInstance, getVideoInstanceQuestions, submitQuestionAnswer } from '../../../../services/videoService';
+import { getVideoInstance, getVideoInstanceQuestions, submitQuestionAnswer, secondsToReadableTime } from '../../../../services/videoService';
 import { useLocalStorage } from '../../../../hooks/useLocalStorage';
 
 const getVideoProgressLSKey = (instanceId: string): string => {
     return `AA_WATCH_${instanceId}`;
-}
-
-const secondsToReadableTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const leftoverSecondsFromHours = seconds - (hours * 3600);
-    const minutes = Math.floor(leftoverSecondsFromHours / 60);
-    const leftOverSeconds = leftoverSecondsFromHours - (minutes * 60);
-
-    const minutesReadable = minutes < 10 ? `0${minutes}` : minutes;
-    const secondsReadable = leftOverSeconds < 10 ? `0${leftOverSeconds}` : leftOverSeconds;
-
-    return `${hours}:${minutesReadable}:${secondsReadable}`;
 }
 
 const WatchVideoPage: NextPage = () => {
