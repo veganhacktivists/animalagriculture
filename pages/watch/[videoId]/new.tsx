@@ -47,7 +47,7 @@ const New: NextPage = () => {
                     {!loading && (
                         <div>
                             <VideoInfo>
-                                <h4>{video.title}</h4>
+                                <h4>&ldquo;{video.title}&ldquo;</h4>
                                 <h5>You&apos;ll receive <Reward>${video.reward}</Reward> for completing this video.</h5>
                             </VideoInfo>
 

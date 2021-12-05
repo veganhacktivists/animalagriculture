@@ -12,7 +12,7 @@ export default async function handler(
         const {data, error} = await supabaseServer
             .from('video_instances')
             .select(`
-                video_id (url, length),
+                video_id (url, length, end_time),
                 questions,
                 answers
             `)
@@ -39,7 +39,10 @@ export default async function handler(
             'unstarted';
         
         const payload = {
-            instance,
+            instance: {
+                "video_id": instance.video_id,
+                "end_time": instance.end_time
+            },
             status
         };
 

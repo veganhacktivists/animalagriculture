@@ -6,7 +6,7 @@ type CaptchaAnswers = {
     [captchaId: string]: string
 }
 
-const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
+const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha, setHasAnsweredAllQuestions}) => {
     const [answers, setAnswers] = useState<CaptchaAnswers>({});
     const [erroredCaptchas, setErroredCaptchas] = useState<string[]>([]);
     const [submittingCaptcha, setSubmittingCaptcha] = useState<boolean>(false);
@@ -26,6 +26,10 @@ const CaptchaQueue = ({captchas, submitCaptchaAnswer, removeCaptcha}) => {
             .then(res => {
                 if (res.correct) {
                     removeCaptcha(id);
+
+                    if (res.finished) {
+                        setHasAnsweredAllQuestions(true);
+                    }
                 } else {
                     setErroredCaptchas(currentErroredCaptchas =>
                         [...currentErroredCaptchas, id]

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import styled from 'styled-components';
@@ -6,7 +6,7 @@ import ReactPlayer from 'react-player';
 import { useRouter } from 'next/router';
 import { MainHeader } from '../../../../components/Header';
 import CaptchaQueue from '../../../../components/CaptchaQueue';
-import { Button, Container, Icon, PageContainer, ButtonRow, Margin } from '../../../../components/styled';
+import { Button, Container, Icon, PageContainer, ButtonRow, Margin, StyledLink } from '../../../../components/styled';
 import { breakPoints, Colors } from '../../../../components/styled/consts';
 import { getVideoInstance, getVideoInstanceQuestions, submitQuestionAnswer } from '../../../../services/videoService';
 import { useLocalStorage } from '../../../../hooks/useLocalStorage';
@@ -28,7 +28,7 @@ const secondsToReadableTime = (seconds: number) => {
 }
 
 const WatchVideoPage: NextPage = () => {
-    const [videoURL, setVideoURL] = useState(null);
+    const [instance, setInstance] = useState(null);
     const videoRef = useRef(null);
     const router = useRouter();
     const videoId = router.query.videoId;
@@ -38,18 +38,26 @@ const WatchVideoPage: NextPage = () => {
     const [playing, setPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(.3);
+    const [volume, setVolume] = useState(0);
     const [captchas, setCaptchas] = useState([]);
-    const [status, setStatus] = useState('unstarted');
+    const [hasAnsweredAllQuestions, setHasAnsweredAllQuestions] = useState(false);
 
-    // @TODO - Figure out how to ensure the LS key is correct upon first load,
-    // because at the moment, the router query params are undefined when this hook runs.
-const [getSavedProgress, setSavedProgress] = useLocalStorage(
+    const completed = useMemo(() => {
+        return instance && hasAnsweredAllQuestions && progress >= instance.video_id.end_time;
+    }, [instance, hasAnsweredAllQuestions, progress]);
+
+    const [getSavedProgress, setSavedProgress] = useLocalStorage(
         getVideoProgressLSKey(router.query.instanceId as string),
         null
     );
     const [hasLoadedSavedProgress, setHasLoadedSavedProgress] = useState(false);
     const [lastQueriedTime, setLastQueriedTime] = useState(0);
+
+    useEffect(() => {
+        if (volume === 0) {
+            setPlaying(false);
+        }
+    }, [volume]);
 
     useEffect(() => {
         const videoId = Array.isArray(router.query.videoId) ? router.query.videoId[0] : router.query.videoId;
@@ -58,8 +66,12 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
         if (videoId && instanceId) {
             getVideoInstance(parseInt(videoId), instanceId)
             .then(res => {
-                    setVideoURL(res.data.instance.video_id.url);
-                    setStatus(res.data.status);
+                    setInstance(res.data.instance);
+                    const status = res.data.status;
+
+                    if (status === 'completed') {
+                        setHasAnsweredAllQuestions(true);
+                    }
                 })
                 .finally(() => setLoading(false))
         }
@@ -71,7 +83,26 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
         }
     }, [router]);
 
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                setPlaying(false);
+            } else {
+                setPlaying(true);
+            }
+        };
+
+        window.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
+    });
+
     const togglePlaying = () => {
+        // Dont let the user play the video is the volume is 0
+        if (!playing && volume === 0) {
+            return;
+        }
+
         setPlaying(!playing);
     }
 
@@ -105,7 +136,7 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
                     setCaptchas(currentCaptchas =>
                         currentCaptchas.filter(currentCaptcha => !incomingCaptchaIds.includes(currentCaptcha.id))
                     );
-                }, 1200000);
+                }, 120000);
             })
             .then(() => setLastQueriedTime(before));
     }
@@ -129,8 +160,9 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
 
     const handleProgress = ({ playedSeconds }) => {
         if (playedSeconds) {
-            setProgress(Math.round(playedSeconds));
-            setSavedProgress(playedSeconds);
+            const roundedPlayedSeconds = Math.round(playedSeconds)
+            setProgress(roundedPlayedSeconds);
+            setSavedProgress(roundedPlayedSeconds);
         }
 
         // Query for questions every 5 seconds
@@ -154,7 +186,6 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
     }
 
     const handleSeek = (seconds) => {
-        console.log(seconds);
         setLastQueriedTime(seconds);
     }
 
@@ -175,11 +206,13 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
 
                     {!loading && !playerOpen && (
                         <div>
-                            
-                            {status === 'completed' && (
+                            {completed && (
                                 <Completed>
                                     <h3>You&apos;ve finished the video!</h3>
                                     <p>Nothing more for you to do, except wait to get paid. Thanks for watching.</p>
+                                    <p>
+                                        If you&apos;d like to provide feedback, <StyledLink target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSf9aFZj992sck8XvGh7K2tLTYCZ18D2b-3bUVKPeQu35JDwSg/viewform?usp=sf_link">you can do that here.</StyledLink> 
+                                    </p>
                                 </Completed>
                             )}
 
@@ -195,13 +228,13 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
                         </div>
                     )}
 
-                    {videoURL && playerOpen && (
+                    {instance?.video_id?.url && playerOpen && (
                         <Modal>
                             <SectionWrapper>
                                 <div style={{flexGrow: 1}}>
                                     <ReactPlayer
                                         ref={videoRef}
-                                        url={videoURL}
+                                        url={instance.video_id.url}
                                         muted={!playing}
                                         playing={playing}
                                         volume={volume}
@@ -251,6 +284,7 @@ const [getSavedProgress, setSavedProgress] = useLocalStorage(
                                         captchas={captchas}
                                         submitCaptchaAnswer={handleSubmitCaptchaAnswer}
                                         removeCaptcha={removeCaptcha}
+                                        setHasAnsweredAllQuestions={setHasAnsweredAllQuestions}
                                     />
                                 </div>
                             </SectionWrapper>

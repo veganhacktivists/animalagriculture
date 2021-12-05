@@ -13,7 +13,8 @@ export default async function handler(
             .from('videos')
             .select(`
                 title,
-                reward
+                reward,
+                length
             `)
             .eq('id', videoId);
 

@@ -60,9 +60,17 @@ export default async function handler(
                     .eq('code', instanceId);
             }
 
-            res.status(201);
+            const answersExlcudingCurrentAnswer = Object.keys(videoInstance.answers)
+                .filter(answerQuestionId => answerQuestionId !== questionId);
+
+            // The user is finished if they have answered all the questions, or they have just answered the final question
+            const isFinished = Object.keys(videoInstance.answers).length === videoInstance.questions.length ||
+                (answersExlcudingCurrentAnswer.length === Object.keys(videoInstance.answers).length - 1 && answeredCorrectly) 
+
+            res.status(200);
             res.json({
-                correct: answeredCorrectly
+                correct: answeredCorrectly,
+                finished: isFinished
             });
         } catch (e) {
             console.error(e);

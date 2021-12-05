@@ -38,7 +38,7 @@ const Home: NextPage = () => {
           </Explanation>
 
           <ButtonRow>
-            <Link href="/watch/3/new"><Button>start watching</Button></Link>
+            <Link href="/watch/4/new"><Button>start watching</Button></Link>
           </ButtonRow>
           <Margin marginTop='10px'>
             <small>This is in alpha, so there is only one video for test purposes.</small>
